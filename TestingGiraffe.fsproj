@@ -5,7 +5,6 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="TableStorage.fs" />
-    <Compile Include="Dumb.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
   <ItemGroup>

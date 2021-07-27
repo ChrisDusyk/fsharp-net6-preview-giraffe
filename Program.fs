@@ -63,12 +63,12 @@ let main args =
 
     let endpoints = [ 
         GET [
-            route "/" (text "Swagger here some day, ya know")
-            route "/games" getAllGamesHandler
-            routef "game/%s" getGameByIdHandler
+            route   "/" (text "Swagger here some day, ya know")
+            route   "/games"    getAllGamesHandler
+            routef  "/games/%s" getGameByIdHandler
         ]
         POST [
-            route "/game" postGameHandler
+            route   "/games"    postGameHandler
         ]
     ]
 
