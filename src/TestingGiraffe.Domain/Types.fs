@@ -23,3 +23,22 @@ module Types =
                   Developer = developer
                   Name = name
                   HasMultiplayer = hasMultiplayer } |> Result.Ok
+
+    type Error = {
+        Message: string
+        InnerException: Exception
+    }
+    module Error =
+        let create message ex =
+            { Message = message
+              InnerException = ex }
+
+    type ServiceError =
+        | UnexpectedError of Error
+        | ValidationError of Error
+
+    module UnexpectedError =
+        let fromException message ex : ServiceError = Error.create message ex |> UnexpectedError
+
+    module ValidationError =
+        let fromException message ex : ServiceError = Error.create message ex |> ValidationError
