@@ -27,6 +27,14 @@ type ErrorResponse = {
     StackTrace: string
 }
 
+let toErrorResponse (error: Domain.Types.ErrorType): ErrorResponse =
+    let stackTrace =
+        match error.InnerException with
+        | Some e -> e.StackTrace
+        | None _ -> ""
+    { Message = error.Message
+      StackTrace = stackTrace }
+
 let postGameHandler: HttpHandler =
     fun (next: HttpFunc) (ctx: HttpContext) -> task {
         let! game = ctx.BindJsonAsync<GameResource>()
@@ -35,7 +43,10 @@ let postGameHandler: HttpHandler =
         return!
             (match result with
             | Ok () -> Successful.NO_CONTENT
-            | Error ex -> RequestErrors.BAD_REQUEST ex) next ctx
+            | Error ex ->
+                match ex with
+                | Domain.Types.ServiceError.UnexpectedError u -> u |> toErrorResponse |> ServerErrors.INTERNAL_ERROR
+                | Domain.Types.ServiceError.ValidationError v -> v |> toErrorResponse |> RequestErrors.BAD_REQUEST) next ctx
     }
 
 let getAllGamesHandler: HttpHandler =
@@ -45,7 +56,11 @@ let getAllGamesHandler: HttpHandler =
         return!
             (match games with
             | Ok g -> g |> Seq.map toGameResource |> Successful.OK
-            | Error ex -> ServerErrors.INTERNAL_ERROR ex) next ctx
+            | Error ex ->
+                match ex with
+                | Domain.Types.ServiceError.UnexpectedError u -> u |> toErrorResponse |> ServerErrors.INTERNAL_ERROR
+                | Domain.Types.ServiceError.ValidationError v -> v |> toErrorResponse |> RequestErrors.BAD_REQUEST) next ctx
+
     }
 
 let getGameByIdHandler (id: string): HttpHandler =
@@ -54,7 +69,10 @@ let getGameByIdHandler (id: string): HttpHandler =
         return!
             (match game with
             | Ok g -> g |> toGameResource |> Successful.OK
-            | Error ex -> ServerErrors.INTERNAL_ERROR ex) next ctx
+            | Error ex ->
+                match ex with
+                | Domain.Types.ServiceError.UnexpectedError u -> u |> toErrorResponse |> ServerErrors.INTERNAL_ERROR
+                | Domain.Types.ServiceError.ValidationError v -> v |> toErrorResponse |> RequestErrors.BAD_REQUEST) next ctx
     }
 
 [<EntryPoint>]

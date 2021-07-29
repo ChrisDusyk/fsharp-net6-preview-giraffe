@@ -3,23 +3,28 @@
 module Types =
     open System
 
-    type Error = {
+    type ErrorType = {
         Message: string
         InnerException: Exception option
     }
-    module Error =
+    module ErrorType =
         let create message ex =
             { Message = message
               InnerException = ex }
+        let value e = e
 
     type ServiceError =
-        | UnexpectedError of Error
-        | ValidationError of Error
+        | UnexpectedError of ErrorType
+        | ValidationError of ErrorType
     module ServiceError =
-        let unexpectedErrorFromException message ex : ServiceError = Error.create message ex |> UnexpectedError
-        let validationErrorFromException message ex : ServiceError = Error.create message ex |> ValidationError
-        let unexpectedError message = Error.create message Option.None |> UnexpectedError
-        let validationError message = Error.create message Option.None |> ValidationError
+        let unexpectedErrorFromException message ex : ServiceError = ErrorType.create message ex |> UnexpectedError
+        let validationErrorFromException message ex : ServiceError = ErrorType.create message ex |> ValidationError
+        let unexpectedError message = ErrorType.create message Option.None |> UnexpectedError
+        let validationError message = ErrorType.create message Option.None |> ValidationError
+        let value serviceError =
+            match serviceError with
+            | UnexpectedError e -> e
+            | ValidationError v -> v
 
     type Game = {
         Id: Guid
