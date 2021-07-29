@@ -17,8 +17,8 @@ module Types =
         | UnexpectedError of ErrorType
         | ValidationError of ErrorType
     module ServiceError =
-        let unexpectedErrorFromException message ex : ServiceError = ErrorType.create message ex |> UnexpectedError
-        let validationErrorFromException message ex : ServiceError = ErrorType.create message ex |> ValidationError
+        let unexpectedErrorFromException message ex = ErrorType.create message ex |> UnexpectedError
+        let validationErrorFromException message ex = ErrorType.create message ex |> ValidationError
         let unexpectedError message = ErrorType.create message Option.None |> UnexpectedError
         let validationError message = ErrorType.create message Option.None |> ValidationError
         let value serviceError =
