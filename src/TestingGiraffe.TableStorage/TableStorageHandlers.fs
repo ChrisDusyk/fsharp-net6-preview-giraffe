@@ -7,11 +7,8 @@ module Handlers =
 
     let [<Literal>] private gamesTableName = "Games"
 
-    let private account = CloudStorageAccount.Parse "UseDevelopmentStorage=true"
-    let private tableClient = account.CreateCloudTableClient()
-
-    let private fromGameTable (query: EntityQuery<'a>) = fromTable tableClient gamesTableName query
-    let private inGameTable game = inTable tableClient gamesTableName game
+    let private fromGameTable tableClient (query: EntityQuery<'a>) = fromTable tableClient gamesTableName query
+    let private inGameTable tableClient game = inTable tableClient gamesTableName game
 
     let private toDomainGame (tableStorageGame: Game) =
         Domain.Types.Game.create tableStorageGame.Id tableStorageGame.Developer tableStorageGame.Name tableStorageGame.HasMultiplayer
@@ -21,22 +18,22 @@ module Handlers =
           Name = domainGame.Name
           HasMultiplayer = domainGame.HasMultiplayer }
 
-    let getAllGamesFromTableStorage =
+    let private getAllGamesFromTableStorage (tableClient: CloudTableClient) =
         fun _ ->
             try
-                let games = Query.all<Game> |> fromGameTable |> Seq.map fst
+                let games = Query.all<Game> |> fromGameTable tableClient |> Seq.map fst
                 games |> Result.traverseResult toDomainGame
             with
                 | :? System.Exception as ex ->
                     let message = sprintf "Error retrieving all games: %s" ex.Message
                     Domain.Types.ServiceError.unexpectedErrorFromException message (Option.Some ex) |> Result.Error
 
-    let getGameByIdFromTableStorage (id: string) =
+    let private getGameByIdFromTableStorage (tableClient: CloudTableClient) (id: string) =
         try
             let game =
                 Query.all<Game>
                 |> Query.where <@ fun g s -> s.RowKey = id @>
-                |> fromGameTable
+                |> fromGameTable tableClient
                 |> Seq.map fst
                 |> Seq.head
                 |> toDomainGame
@@ -46,9 +43,18 @@ module Handlers =
                 let message = sprintf "Error getting game %s: %s" id ex.Message
                 Domain.Types.ServiceError.unexpectedErrorFromException message (Option.Some ex) |> Result.Error
 
-    let insertGameIntoTableStorage (game: Domain.Types.Game) =
-        let result = game |> toTableStorageGame |> Insert |> inGameTable
+    let private insertGameIntoTableStorage (tableClient: CloudTableClient) (game: Domain.Types.Game) =
+        let result = game |> toTableStorageGame |> Insert |> inGameTable tableClient
         if result.HttpStatusCode >= 200 && result.HttpStatusCode < 300 then
             Result.Ok ()
         else
             result.ToString() |> sprintf "Error saving game: %s" |> Domain.Types.ServiceError.unexpectedError |> Result.Error
+
+    let composeInsertGameHandler tableClient =
+        insertGameIntoTableStorage tableClient
+
+    let composeGetAllGamesHandler tableClient =
+        getAllGamesFromTableStorage tableClient
+
+    let composeGetGameByIdHandler tableClient =
+        getGameByIdFromTableStorage tableClient

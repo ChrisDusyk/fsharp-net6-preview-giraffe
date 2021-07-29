@@ -28,3 +28,8 @@ let toErrorResponse (error: Domain.Types.ErrorType): ErrorResponse =
         | None _ -> ""
     { Message = error.Message
       StackTrace = stackTrace }
+
+type TableStorageConnectionString = TableStorageConnectionString of string
+module TableStorageConnectionString =
+    let create c = (TableStorageConnectionString c)
+    let value (TableStorageConnectionString c) = c
