@@ -1,10 +1,9 @@
-﻿namespace TestingGiraffe.TableStorage
+﻿namespace TableStorage
 
-module TableStorageHandlers =
+module Handlers =
     open FSharp.Azure.Storage.Table
     open Microsoft.Azure.Cosmos.Table
-    open Types
-    open TestingGiraffe
+    open TableStorage.Types
 
     let [<Literal>] private gamesTableName = "Games"
 
@@ -16,7 +15,7 @@ module TableStorageHandlers =
 
     let private toDomainGame (tableStorageGame: Game) =
         Domain.Types.Game.create tableStorageGame.Id tableStorageGame.Developer tableStorageGame.Name tableStorageGame.HasMultiplayer
-    let private toTableStorageGame (domainGame: TestingGiraffe.Domain.Types.Game) : Game =
+    let private toTableStorageGame (domainGame: Domain.Types.Game) : Game =
         { Id = domainGame.Id.ToString()
           Developer = domainGame.Developer
           Name = domainGame.Name
@@ -43,7 +42,7 @@ module TableStorageHandlers =
         with
             | :? System.Exception as ex -> ex.ToString() |> sprintf "Error getting game: %s" |> Result.Error
 
-    let insertGameIntoTableStorage (game: TestingGiraffe.Domain.Types.Game) =
+    let insertGameIntoTableStorage (game: Domain.Types.Game) =
         let result = game |> toTableStorageGame |> Insert |> inGameTable
         if result.HttpStatusCode >= 200 && result.HttpStatusCode < 300 then
             Result.Ok ()

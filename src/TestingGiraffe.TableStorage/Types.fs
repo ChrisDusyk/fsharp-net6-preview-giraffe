@@ -1,6 +1,6 @@
-﻿namespace TestingGiraffe.TableStorage
+﻿namespace TableStorage
 
-module Types =
+module Types = 
     open FSharp.Azure.Storage.Table
 
     type Game = {
@@ -9,7 +9,7 @@ module Types =
         Name: string
         HasMultiplayer: bool }
 
-module Result =
+    module Result =
     let traverseResult f list =
         let (>>=) x f = Result.bind f x
         let retn = Result.Ok

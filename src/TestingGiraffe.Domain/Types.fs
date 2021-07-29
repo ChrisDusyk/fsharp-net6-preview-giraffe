@@ -1,4 +1,4 @@
-﻿namespace TestingGiraffe.Domain
+﻿namespace Domain
 
 module Types =
     open System

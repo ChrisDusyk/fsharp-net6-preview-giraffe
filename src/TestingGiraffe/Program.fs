@@ -12,7 +12,7 @@ type GameResource = {
     Name: string
     HasMultiplayer: bool }
 
-let toGameResource (game: TestingGiraffe.Domain.Types.Game): GameResource =
+let toGameResource (game: Domain.Types.Game): GameResource =
     { Developer = game.Developer
       Id = game.Id
       Name = game.Name
@@ -20,12 +20,12 @@ let toGameResource (game: TestingGiraffe.Domain.Types.Game): GameResource =
 
 let toDomainGame (game: GameResource) =
     let stringGameId = game.Id.ToString()
-    TestingGiraffe.Domain.Types.Game.create stringGameId game.Developer game.Name game.HasMultiplayer
+    Domain.Types.Game.create stringGameId game.Developer game.Name game.HasMultiplayer
 
 let postGameHandler: HttpHandler =
     fun (next: HttpFunc) (ctx: HttpContext) -> task {
         let! game = ctx.BindJsonAsync<GameResource>()
-        let domainHandler = Domain.insertNewGame TestingGiraffe.TableStorage.TableStorageHandlers.insertGameIntoTableStorage
+        let domainHandler = Domain.Domain.insertNewGame TableStorage.Handlers.insertGameIntoTableStorage
         let result = game |> toDomainGame |> Result.bind domainHandler
         return!
             (match result with
@@ -35,7 +35,7 @@ let postGameHandler: HttpHandler =
 
 let getAllGamesHandler: HttpHandler =
     fun (next: HttpFunc) (ctx: HttpContext) -> task {
-        let gamesHandler = Domain.getAllGames TestingGiraffe.TableStorage.TableStorageHandlers.getAllGamesFromTableStorage
+        let gamesHandler = Domain.Domain.getAllGames TableStorage.Handlers.getAllGamesFromTableStorage
         let games = gamesHandler()
         return!
             (match games with
@@ -45,7 +45,7 @@ let getAllGamesHandler: HttpHandler =
 
 let getGameByIdHandler (id: string): HttpHandler =
     fun (next: HttpFunc) (ctx: HttpContext) -> task {
-        let game = Domain.getGameById TestingGiraffe.TableStorage.TableStorageHandlers.getGameByIdFromTableStorage id
+        let game = Domain.Domain.getGameById TableStorage.Handlers.getGameByIdFromTableStorage id
         return!
             (match game with
             | Ok g -> g |> toGameResource |> Successful.OK
