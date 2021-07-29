@@ -22,6 +22,11 @@ let toDomainGame (game: GameResource) =
     let stringGameId = game.Id.ToString()
     Domain.Types.Game.create stringGameId game.Developer game.Name game.HasMultiplayer
 
+type ErrorResponse = {
+    Message: string
+    StackTrace: string
+}
+
 let postGameHandler: HttpHandler =
     fun (next: HttpFunc) (ctx: HttpContext) -> task {
         let! game = ctx.BindJsonAsync<GameResource>()

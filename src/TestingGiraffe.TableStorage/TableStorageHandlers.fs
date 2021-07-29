@@ -27,7 +27,9 @@ module Handlers =
                 let games = Query.all<Game> |> fromGameTable |> Seq.map fst
                 games |> Result.traverseResult toDomainGame
             with
-                | :? System.Exception as ex -> ex.ToString() |> sprintf "Error getting all games: %s" |> Result.Error
+                | :? System.Exception as ex ->
+                    let message = sprintf "Error retrieving all games: %s" ex.Message
+                    Domain.Types.ServiceError.unexpectedErrorFromException message (Option.Some ex) |> Result.Error
 
     let getGameByIdFromTableStorage (id: string) =
         try
@@ -40,11 +42,13 @@ module Handlers =
                 |> toDomainGame
             game
         with
-            | :? System.Exception as ex -> ex.ToString() |> sprintf "Error getting game: %s" |> Result.Error
+            | :? System.Exception as ex ->
+                let message = sprintf "Error getting game %s: %s" id ex.Message
+                Domain.Types.ServiceError.unexpectedErrorFromException message (Option.Some ex) |> Result.Error
 
     let insertGameIntoTableStorage (game: Domain.Types.Game) =
         let result = game |> toTableStorageGame |> Insert |> inGameTable
         if result.HttpStatusCode >= 200 && result.HttpStatusCode < 300 then
             Result.Ok ()
         else
-            result.ToString() |> sprintf "Error saving game: %s" |> Result.Error
+            result.ToString() |> sprintf "Error saving game: %s" |> Domain.Types.ServiceError.unexpectedError |> Result.Error
