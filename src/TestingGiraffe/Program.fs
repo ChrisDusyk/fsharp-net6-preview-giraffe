@@ -31,7 +31,7 @@ let main args =
     let postGameHandler: HttpHandler =
         fun (next: HttpFunc) (ctx: HttpContext) -> task {
             let! game = ctx.BindJsonAsync<GameResource>()
-            let domainHandler = cloudClient |> TableStorage.Handlers.composeInsertGameHandler |> Domain.Domain.insertNewGame
+            let domainHandler = cloudClient |> TableStorage.Handlers.composeInsertGameHandler |> Domain.Domain.composeInsertNewGame
             let result = game |> toDomainGame |> Result.bind domainHandler
             return!
                 (match result with
@@ -41,7 +41,7 @@ let main args =
         
     let getAllGamesHandler: HttpHandler =
         fun (next: HttpFunc) (ctx: HttpContext) -> task {
-            let domainHandler = cloudClient |> TableStorage.Handlers.composeGetAllGamesHandler |> Domain.Domain.getAllGames
+            let domainHandler = cloudClient |> TableStorage.Handlers.composeGetAllGamesHandler |> Domain.Domain.composeGetAllGames
             let games = domainHandler()
             return!
                 (match games with
@@ -52,7 +52,7 @@ let main args =
         
     let getGameByIdHandler (id: string): HttpHandler =
         fun (next: HttpFunc) (ctx: HttpContext) -> task {
-            let domainHandler = cloudClient |> TableStorage.Handlers.composeGetGameByIdHandler |> Domain.Domain.getGameById
+            let domainHandler = cloudClient |> TableStorage.Handlers.composeGetGameByIdHandler |> Domain.Domain.composeGetGameById
             let game = domainHandler id
             return!
                 (match game with
