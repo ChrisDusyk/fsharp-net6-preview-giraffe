@@ -1,0 +1,24 @@
+@baseUrl = https://localhost:5001
+
+### Create new game
+
+POST {{baseUrl}}/games
+Content-Type: application/json
+Accept: application/json
+
+{
+    "Developer": "Bungie",
+    "Id": "{{$guid}}",
+    "Name": "Some cool game 5",
+    "HasMultiplayer": true
+}
+
+### Get game by ID
+
+GET {{baseUrl}}/games/36c5c714-8f29-405d-9edc-43e7a9282940
+Accept: application/json
+
+### Get all games
+
+GET {{baseUrl}}/games
+Accept: application/json
