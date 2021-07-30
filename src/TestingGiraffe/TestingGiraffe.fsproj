@@ -4,13 +4,17 @@
     <LangVersion>preview</LangVersion>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="TableStorage.fs" />
+    <Compile Include="Types.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="FSharp.Azure.Storage" Version="5.0.1" />
     <PackageReference Include="Giraffe" Version="5.0.0" />
     <PackageReference Include="Microsoft.Azure.Cosmos.Table" Version="1.0.8" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\TestingGiraffe.Domain\TestingGiraffe.Domain.fsproj" />
+    <ProjectReference Include="..\TestingGiraffe.TableStorage\TestingGiraffe.TableStorage.fsproj" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Update="FSharp.Core" Version="5.0.2" />
