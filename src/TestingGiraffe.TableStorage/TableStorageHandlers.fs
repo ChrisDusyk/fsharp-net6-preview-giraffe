@@ -4,6 +4,7 @@ module Handlers =
     open FSharp.Azure.Storage.Table
     open Microsoft.Azure.Cosmos.Table
     open TableStorage.Types
+    open Domain
 
     let [<Literal>] private gamesTableName = "Games"
 
